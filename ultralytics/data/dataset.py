@@ -275,6 +275,7 @@ class YOLOMultiModalDataset(YOLODataset):
     def build_transforms(self, hyp=None):
         """Enhances data transformations with optional text augmentation for multi-modal training."""
         transforms = super().build_transforms(hyp)
+        self.augment = False
         if self.augment:
             # NOTE: hard-coded the args for now.
             transforms.insert(-1, RandomLoadText(max_samples=min(self.data["nc"], 80), padding=True))
@@ -347,6 +348,7 @@ class GroundingDataset(YOLODataset):
     def build_transforms(self, hyp=None):
         """Configures augmentations for training with optional text loading; `hyp` adjusts augmentation intensity."""
         transforms = super().build_transforms(hyp)
+        self.augment = False
         if self.augment:
             # NOTE: hard-coded the args for now.
             transforms.insert(-1, RandomLoadText(max_samples=80, padding=True))
@@ -419,9 +421,12 @@ class ClassificationDataset:
         import torchvision  # scope for faster 'import ultralytics'
 
         # Base class assigned as attribute rather than used as base class to allow for scoping slow torchvision import
+        self.ch = 1
+        self.input_channels = self.ch
         self.base = torchvision.datasets.ImageFolder(root=root)
         self.samples = self.base.samples
         self.root = self.base.root
+        augment = False
 
         # Initialize attributes
         if augment and args.fraction < 1.0:  # reduce training fraction
